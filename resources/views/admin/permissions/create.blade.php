@@ -6,39 +6,39 @@
 
 <div class="card">
 
-<div class="card-header">
-Create Permission
-</div>
+	<div class="card-header">
+		Create Permission
+	</div>
 
-<form action="{{ route('admin.permissions.store') }}" method="POST">
+	<form action="{{ route('admin.permissions.store') }}" method="POST">
 
-@csrf
+		@csrf
 
-<div class="card-body">
+		<div class="card-body">
 
-<label>Name</label>
+			<label>Name</label>
 
-<input type="text" name="name" class="form-control">
+			<input type="text" name="name" class="form-control">
 
-<br>
+			<br>
 
-<label>Slug</label>
+			<label>Slug</label>
 
-<input type="text" name="slug" class="form-control">
+			<input type="text" name="slug" class="form-control">
 
-</div>
+		</div>
 
-<div class="card-footer">
+		<div class="card-footer">
 
-<button class="btn btn-success">
+			<button class="btn btn-success">
 
-Save Permission
+				Save Permission
 
-</button>
+			</button>
 
-</div>
+		</div>
 
-</form>
+	</form>
 
 </div>
 

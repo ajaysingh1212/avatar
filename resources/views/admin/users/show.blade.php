@@ -6,27 +6,27 @@
 
 <div class="card">
 
-<div class="card-header">
+	<div class="card-header">
 
-<h3>User Details</h3>
+		<h3>User Details</h3>
 
-</div>
+	</div>
 
-<div class="card-body">
+	<div class="card-body">
 
-<p><strong>Name:</strong> {{ $user->name }}</p>
+		<p><strong>Name:</strong> {{ $user->name }}</p>
 
-<p><strong>Email:</strong> {{ $user->email }}</p>
+		<p><strong>Email:</strong> {{ $user->email }}</p>
 
-<p>
+		<p>
 
-<strong>Role:</strong>
+			<strong>Role:</strong>
 
-{{ $user->roles->pluck('name')->implode(',') }}
+			{{ $user->roles->pluck('name')->implode(',') }}
 
-</p>
+		</p>
 
-</div>
+	</div>
 
 </div>
 

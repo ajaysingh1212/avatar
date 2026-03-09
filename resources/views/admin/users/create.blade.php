@@ -6,79 +6,79 @@
 
 <div class="card shadow-lg">
 
-<div class="card-header">
-<h3>Create User</h3>
-</div>
+	<div class="card-header">
+		<h3>Create User</h3>
+	</div>
 
-<form action="{{ route('admin.users.store') }}" method="POST">
+	<form action="{{ route('admin.users.store') }}" method="POST">
 
-@csrf
+		@csrf
 
-<div class="card-body">
+		<div class="card-body">
 
-<div class="row">
+			<div class="row">
 
-<div class="col-md-6">
+				<div class="col-md-6">
 
-<label>Name</label>
+					<label>Name</label>
 
-<input type="text" name="name" class="form-control">
+					<input type="text" name="name" class="form-control">
 
-</div>
+				</div>
 
-<div class="col-md-6">
+				<div class="col-md-6">
 
-<label>Email</label>
+					<label>Email</label>
 
-<input type="email" name="email" class="form-control">
+					<input type="email" name="email" class="form-control">
 
-</div>
+				</div>
 
-</div>
+			</div>
 
-<br>
+			<br>
 
-<div class="row">
+			<div class="row">
 
-<div class="col-md-6">
+				<div class="col-md-6">
 
-<label>Password</label>
+					<label>Password</label>
 
-<input type="password" name="password" class="form-control">
+					<input type="password" name="password" class="form-control">
 
-</div>
+				</div>
 
-<div class="col-md-6">
+				<div class="col-md-6">
 
-<label>Role</label>
+					<label>Role</label>
 
-<select name="roles[]" class="form-control">
+					<select name="roles[]" class="form-control">
 
-@foreach($roles as $role)
+						@foreach($roles as $role)
 
-<option value="{{ $role->id }}">
-{{ $role->name }}
-</option>
+						<option value="{{ $role->id }}">
+							{{ $role->name }}
+						</option>
 
-@endforeach
+						@endforeach
 
-</select>
+					</select>
 
-</div>
+				</div>
 
-</div>
+			</div>
 
-</div>
+		</div>
 
-<div class="card-footer">
+		<div class="card-footer">
 
-<button class="btn btn-success">
-<i class="fas fa-save"></i> Save
-</button>
+			<button class="btn btn-success">
+				<i class="fas fa-save"></i> Save
+			</button>
 
-</div>
+		</div>
 
-</form>
+	</form>
 
 </div>
 

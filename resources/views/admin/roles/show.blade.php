@@ -6,29 +6,29 @@
 
 <div class="card">
 
-<div class="card-header">
-Role Details
-</div>
+	<div class="card-header">
+		Role Details
+	</div>
 
-<div class="card-body">
+	<div class="card-body">
 
-<p><strong>Name:</strong> {{ $role->name }}</p>
+		<p><strong>Name:</strong> {{ $role->name }}</p>
 
-<p><strong>Slug:</strong> {{ $role->slug }}</p>
+		<p><strong>Slug:</strong> {{ $role->slug }}</p>
 
-<h5>Permissions</h5>
+		<h5>Permissions</h5>
 
-@foreach($role->permissions as $permission)
+		@foreach($role->permissions as $permission)
 
-<span class="badge badge-success">
+		<span class="badge badge-success">
 
-{{ $permission->name }}
+			{{ $permission->name }}
 
-</span>
+		</span>
 
-@endforeach
+		@endforeach
 
-</div>
+	</div>
 
 </div>
 

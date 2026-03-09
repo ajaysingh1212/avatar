@@ -6,80 +6,80 @@
 
 <div class="card">
 
-<div class="card-header">
-Edit Role
-</div>
+	<div class="card-header">
+		Edit Role
+	</div>
 
-<form action="{{ route('admin.roles.update',$role->id) }}" method="POST">
+	<form action="{{ route('admin.roles.update',$role->id) }}" method="POST">
 
-@csrf
-@method('PUT')
+		@csrf
+		@method('PUT')
 
-<div class="card-body">
+		<div class="card-body">
 
-<div class="form-group">
+			<div class="form-group">
 
-<label>Role Name</label>
+				<label>Role Name</label>
 
-<input type="text"
-name="name"
-value="{{ $role->name }}"
-class="form-control">
+				<input type="text"
+				name="name"
+				value="{{ $role->name }}"
+				class="form-control">
 
-</div>
-
-
-<div class="form-group">
-
-<label>Slug</label>
-
-<input type="text"
-name="slug"
-value="{{ $role->slug }}"
-class="form-control">
-
-</div>
+			</div>
 
 
-<h5>Permissions</h5>
+			<div class="form-group">
 
-<div class="row">
+				<label>Slug</label>
 
-@foreach($permissions as $permission)
+				<input type="text"
+				name="slug"
+				value="{{ $role->slug }}"
+				class="form-control">
 
-<div class="col-md-3">
+			</div>
 
-<label>
 
-<input
-type="checkbox"
-name="permissions[]"
-value="{{ $permission->id }}"
-{{ in_array($permission->id,$rolePermissions) ? 'checked' : '' }}>
+			<h5>Permissions</h5>
 
-{{ $permission->name }}
+			<div class="row">
 
-</label>
+				@foreach($permissions as $permission)
 
-</div>
+				<div class="col-md-3">
 
-@endforeach
+					<label>
 
-</div>
+						<input
+						type="checkbox"
+						name="permissions[]"
+						value="{{ $permission->id }}"
+						{{ in_array($permission->id,$rolePermissions) ? 'checked' : '' }}>
 
-</div>
+						{{ $permission->name }}
 
-<div class="card-footer">
+					</label>
 
-<button class="btn btn-success">
+				</div>
 
-<i class="fas fa-save"></i> Update
+				@endforeach
 
-</button>
+			</div>
 
-</div>
+		</div>
 
-</form>
+		<div class="card-footer">
+
+			<button class="btn btn-success">
+
+				<i class="fas fa-save"></i> Update
+
+			</button>
+
+		</div>
+
+	</form>
 
 </div>
 

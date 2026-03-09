@@ -6,90 +6,90 @@
 
 <div class="card">
 
-<div class="card-header d-flex justify-content-between align-items-center">
+	<div class="card-header d-flex justify-content-between align-items-center">
 
-<h3 class="">
-<i class="fas fa-key"></i> Permissions
-</h3>
+		<h3 class="">
+			<i class="fas fa-key"></i> Permissions
+		</h3>
 
-<a href="{{ route('admin.permissions.create') }}"
-class="btn btn-primary btn-sm">
+		<a href="{{ route('admin.permissions.create') }}"
+		class="btn btn-primary btn-sm">
 
-<i class="fas fa-plus"></i>
+		<i class="fas fa-plus"></i>
 
-Create Permission
+		Create Permission
 
-</a>
+	</a>
 
 </div>
 
 <div class="card-body">
 
-<table id="userTable" class="table table-bordered">
+	<table id="userTable" class="table table-bordered">
 
-<thead class="bg-dark">
+		<thead class="bg-dark">
 
-<tr>
-<th>ID</th>
-<th>Name</th>
-<th>Slug</th>
-<th width="200">Action</th>
-</tr>
+			<tr>
+				<th>ID</th>
+				<th>Name</th>
+				<th>Slug</th>
+				<th width="200">Action</th>
+			</tr>
 
-</thead>
+		</thead>
 
-<tbody>
+		<tbody>
 
-@foreach($permissions as $permission)
+			@foreach($permissions as $permission)
 
-<tr>
+			<tr>
 
-<td>{{ $permission->id }}</td>
+				<td>{{ $permission->id }}</td>
 
-<td>{{ $permission->name }}</td>
+				<td>{{ $permission->name }}</td>
 
-<td>{{ $permission->slug }}</td>
+				<td>{{ $permission->slug }}</td>
 
-<td>
+				<td>
 
-<a href="{{ route('admin.permissions.show',$permission->id) }}"
-class="btn btn-info btn-sm">
+					<a href="{{ route('admin.permissions.show',$permission->id) }}"
+						class="btn btn-info btn-sm">
 
-<i class="fas fa-eye"></i>
+						<i class="fas fa-eye"></i>
 
-</a>
+					</a>
 
-<a href="{{ route('admin.permissions.edit',$permission->id) }}"
-class="btn btn-warning btn-sm">
+					<a href="{{ route('admin.permissions.edit',$permission->id) }}"
+						class="btn btn-warning btn-sm">
 
-<i class="fas fa-edit"></i>
+						<i class="fas fa-edit"></i>
 
-</a>
+					</a>
 
-<form action="{{ route('admin.permissions.destroy',$permission->id) }}"
-method="POST"
-style="display:inline">
+					<form action="{{ route('admin.permissions.destroy',$permission->id) }}"
+						method="POST"
+						style="display:inline">
 
-@csrf
-@method('DELETE')
+						@csrf
+						@method('DELETE')
 
-<button class="btn btn-danger btn-sm">
+						<button class="btn btn-danger btn-sm">
 
-<i class="fas fa-trash"></i>
+							<i class="fas fa-trash"></i>
 
-</button>
+						</button>
 
-</form>
+					</form>
 
-</td>
+				</td>
 
-</tr>
+			</tr>
 
-@endforeach
+			@endforeach
 
-</tbody>
+		</tbody>
 
-</table>
+	</table>
 
 </div>
 
@@ -100,104 +100,104 @@ style="display:inline">
 
 <script>
 
-$(document).ready(function(){
+	$(document).ready(function(){
 
-$('#userTable').DataTable({
+		$('#userTable').DataTable({
 
-pageLength:50,
+			pageLength:50,
 
-lengthMenu:[
-[10,25,50,100,500],
-[10,25,50,100,500]
-],
+			lengthMenu:[
+				[10,25,50,100,500],
+				[10,25,50,100,500]
+			],
 
-dom:'Bfrtip',
+			dom:'Bfrtip',
 
-buttons:[
+			buttons:[
 
-{
-extend:'copy',
-className:'btn btn-secondary btn-sm'
-},
+				{
+					extend:'copy',
+					className:'btn btn-secondary btn-sm'
+				},
 
-{
-extend:'csv',
-className:'btn btn-success btn-sm'
-},
+				{
+					extend:'csv',
+					className:'btn btn-success btn-sm'
+				},
 
-{
-extend:'excel',
-className:'btn btn-success btn-sm'
-},
+				{
+					extend:'excel',
+					className:'btn btn-success btn-sm'
+				},
 
-{
-extend:'pdf',
-className:'btn btn-danger btn-sm'
-},
+				{
+					extend:'pdf',
+					className:'btn btn-danger btn-sm'
+				},
 
-{
-extend:'print',
-className:'btn btn-info btn-sm'
-},
+				{
+					extend:'print',
+					className:'btn btn-info btn-sm'
+				},
 
-{
-extend:'colvis',
-className:'btn btn-warning btn-sm'
-}
+				{
+					extend:'colvis',
+					className:'btn btn-warning btn-sm'
+				}
 
-]
+			]
 
-});
+		});
 
-});
+	});
 
 
 // SweetAlert Delete
 
-$(document).on('click','.deleteUser',function(){
+	$(document).on('click','.deleteUser',function(){
 
-let form = $(this).closest('form');
+		let form = $(this).closest('form');
 
-Swal.fire({
+		Swal.fire({
 
-title:'Are you sure?',
-text:'This user will be deleted permanently!',
-icon:'warning',
-showCancelButton:true,
-confirmButtonColor:'#d33',
-confirmButtonText:'Yes Delete'
+			title:'Are you sure?',
+			text:'This user will be deleted permanently!',
+			icon:'warning',
+			showCancelButton:true,
+			confirmButtonColor:'#d33',
+			confirmButtonText:'Yes Delete'
 
-}).then((result)=>{
+		}).then((result)=>{
 
-if(result.isConfirmed){
+			if(result.isConfirmed){
 
-form.submit();
+				form.submit();
 
-}
+			}
 
-});
+		});
 
-});
+	});
 
 </script>
 
 
 <style>
 
-.action-btn{
-transition:0.3s;
-}
+	.action-btn{
+		transition:0.3s;
+	}
 
-.action-btn:hover{
+	.action-btn:hover{
 
-transform:scale(1.15);
-box-shadow:0px 3px 10px rgba(0,0,0,0.3);
+		transform:scale(1.15);
+		box-shadow:0px 3px 10px rgba(0,0,0,0.3);
 
-}
+	}
 
-.dataTables_wrapper .dt-buttons{
-margin-bottom:10px;
-}
+	.dataTables_wrapper .dt-buttons{
+		margin-bottom:10px;
+	}
 
 </style>
 

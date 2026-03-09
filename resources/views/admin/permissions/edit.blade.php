@@ -6,54 +6,54 @@
 
 <div class="card">
 
-<div class="card-header">
-Edit Permission
-</div>
+	<div class="card-header">
+		Edit Permission
+	</div>
 
-<form action="{{ route('admin.permissions.update',$permission->id) }}" method="POST">
+	<form action="{{ route('admin.permissions.update',$permission->id) }}" method="POST">
 
-@csrf
-@method('PUT')
+		@csrf
+		@method('PUT')
 
-<div class="card-body">
+		<div class="card-body">
 
-<div class="form-group">
+			<div class="form-group">
 
-<label>Name</label>
+				<label>Name</label>
 
-<input
-type="text"
-name="name"
-value="{{ $permission->name }}"
-class="form-control">
+				<input
+				type="text"
+				name="name"
+				value="{{ $permission->name }}"
+				class="form-control">
 
-</div>
+			</div>
 
-<div class="form-group">
+			<div class="form-group">
 
-<label>Slug</label>
+				<label>Slug</label>
 
-<input
-type="text"
-name="slug"
-value="{{ $permission->slug }}"
-class="form-control">
+				<input
+				type="text"
+				name="slug"
+				value="{{ $permission->slug }}"
+				class="form-control">
 
-</div>
+			</div>
 
-</div>
+		</div>
 
-<div class="card-footer">
+		<div class="card-footer">
 
-<button class="btn btn-success">
+			<button class="btn btn-success">
 
-Update
+				Update
 
-</button>
+			</button>
 
-</div>
+		</div>
 
-</form>
+	</form>
 
 </div>
 

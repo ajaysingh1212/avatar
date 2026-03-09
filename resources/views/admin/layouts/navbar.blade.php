@@ -1,18 +1,18 @@
 <nav class="main-header navbar navbar-expand navbar-dark">
 
-<ul class="navbar-nav">
+	<ul class="navbar-nav">
 
-<li class="nav-item">
+		<li class="nav-item">
 
-<a class="nav-link animated-icon"
-data-widget="pushmenu"
-href="#">
+			<a class="nav-link animated-icon"
+			data-widget="pushmenu"
+			href="#">
 
-<i class="fas fa-bars"></i>
+			<i class="fas fa-bars"></i>
 
-</a>
+		</a>
 
-</li>
+	</li>
 
 </ul>
 
@@ -24,17 +24,17 @@ href="#">
 
 <li class="nav-item mr-3">
 
-<a href="#" class="nav-link wallet-box">
+	<a href="#" class="nav-link wallet-box">
 
-<i class="fas fa-wallet wallet-icon"></i>
+		<i class="fas fa-wallet wallet-icon"></i>
 
-<span class="wallet-amount">
+		<span class="wallet-amount">
 
-₹ 2,500
+			₹ 2,500
 
-</span>
+		</span>
 
-</a>
+	</a>
 
 </li>
 
@@ -43,11 +43,11 @@ href="#">
 
 <li class="nav-item">
 
-<a href="#" class="nav-link animated-icon">
+	<a href="#" class="nav-link animated-icon">
 
-<i class="fas fa-cog"></i>
+		<i class="fas fa-cog"></i>
 
-</a>
+	</a>
 
 </li>
 
@@ -56,17 +56,17 @@ href="#">
 
 <li class="nav-item">
 
-<a href="#" class="nav-link animated-icon">
+	<a href="#" class="nav-link animated-icon">
 
-<i class="fas fa-bell"></i>
+		<i class="fas fa-bell"></i>
 
-<span class="badge badge-danger navbar-badge">
+		<span class="badge badge-danger navbar-badge">
 
-3
+			3
 
-</span>
+		</span>
 
-</a>
+	</a>
 
 </li>
 
@@ -80,30 +80,30 @@ $profile = auth()->user()->media->where('collection_name','profile')->first();
 
 <li class="nav-item dropdown">
 
-<a class="nav-link dropdown-toggle user-menu"
-data-toggle="dropdown"
-href="#">
+	<a class="nav-link dropdown-toggle user-menu"
+	data-toggle="dropdown"
+	href="#">
 
-@if($profile)
+	@if($profile)
 
-<img
-src="{{ asset('storage/'.$profile->file_name) }}"
-class="user-avatar">
+	<img
+	src="{{ asset('storage/'.$profile->file_name) }}"
+	class="user-avatar">
 
-@else
+	@else
 
-<img
-src="https://i.pravatar.cc/40"
-class="user-avatar">
+	<img
+	src="https://i.pravatar.cc/40"
+	class="user-avatar">
 
-@endif
+	@endif
 
 
-<span class="d-none d-md-inline">
+	<span class="d-none d-md-inline">
 
-{{ auth()->user()->name }}
+		{{ auth()->user()->name }}
 
-</span>
+	</span>
 
 </a>
 
@@ -111,38 +111,38 @@ class="user-avatar">
 <div class="dropdown-menu dropdown-menu-right profile-dropdown">
 
 
-<a href="{{ route('profile.edit') }}" class="dropdown-item">
+	<a href="{{ route('profile.edit') }}" class="dropdown-item">
 
-<i class="fas fa-user text-primary"></i>
+		<i class="fas fa-user text-primary"></i>
 
-Profile
+		Profile
 
-</a>
-
-
-<a href="#" class="dropdown-item">
-
-<i class="fas fa-cog text-warning"></i>
-
-Settings
-
-</a>
+	</a>
 
 
-<div class="dropdown-divider"></div>
+	<a href="#" class="dropdown-item">
+
+		<i class="fas fa-cog text-warning"></i>
+
+		Settings
+
+	</a>
 
 
-<form method="POST"
-action="{{ route('logout') }}">
+	<div class="dropdown-divider"></div>
 
-@csrf
 
-<button type="submit"
-class="dropdown-item text-danger">
+	<form method="POST"
+	action="{{ route('logout') }}">
 
-<i class="fas fa-sign-out-alt"></i>
+	@csrf
 
-Logout
+	<button type="submit"
+	class="dropdown-item text-danger">
+
+	<i class="fas fa-sign-out-alt"></i>
+
+	Logout
 
 </button>
 
@@ -159,80 +159,80 @@ Logout
 
 <style>
 
-.user-avatar{
+	.user-avatar{
 
-width:35px;
-height:35px;
-border-radius:50%;
-object-fit:cover;
-margin-right:8px;
-border:2px solid #3b82f6;
+		width:35px;
+		height:35px;
+		border-radius:50%;
+		object-fit:cover;
+		margin-right:8px;
+		border:2px solid #3b82f6;
 
-}
+	}
 
-.wallet-box{
+	.wallet-box{
 
-display:flex;
-align-items:center;
-background:#1f2937;
-padding:5px 10px;
-border-radius:8px;
+		display:flex;
+		align-items:center;
+		background:#1f2937;
+		padding:5px 10px;
+		border-radius:8px;
 
-}
+	}
 
-.wallet-icon{
+	.wallet-icon{
 
-color:#f59e0b;
-margin-right:6px;
-animation:pulse 2s infinite;
+		color:#f59e0b;
+		margin-right:6px;
+		animation:pulse 2s infinite;
 
-}
+	}
 
-.wallet-amount{
+	.wallet-amount{
 
-font-weight:bold;
-color:#10b981;
+		font-weight:bold;
+		color:#10b981;
 
-}
+	}
 
-.animated-icon{
+	.animated-icon{
 
-transition:0.3s;
+		transition:0.3s;
 
-}
+	}
 
-.animated-icon:hover{
+	.animated-icon:hover{
 
-transform:rotate(15deg) scale(1.2);
-color:#60a5fa;
+		transform:rotate(15deg) scale(1.2);
+		color:#60a5fa;
 
-}
+	}
 
-.profile-dropdown{
+	.profile-dropdown{
 
-background:#1f2937;
-color:#fff;
+		background:#1f2937;
+		color:#fff;
 
-}
+	}
 
-.profile-dropdown .dropdown-item{
+	.profile-dropdown .dropdown-item{
 
-color:#e5e7eb;
+		color:#e5e7eb;
 
-}
+	}
 
-.profile-dropdown .dropdown-item:hover{
+	.profile-dropdown .dropdown-item:hover{
 
-background:#374151;
+		background:#374151;
 
-}
+	}
 
-@keyframes pulse{
+	@keyframes pulse{
 
-0%{transform:scale(1)}
-50%{transform:scale(1.2)}
-100%{transform:scale(1)}
+		0%{transform:scale(1)}
+		50%{transform:scale(1.2)}
+		100%{transform:scale(1)}
 
-}
+	}
 
 </style>
