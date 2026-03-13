@@ -25,7 +25,6 @@ protected $fillable = [
 
 public function model()
 {
-return $this->morphTo();
+return $this->morphTo(null,'model_type','model_id');
 }
-
 }

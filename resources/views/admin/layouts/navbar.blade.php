@@ -43,7 +43,7 @@
 
 <li class="nav-item">
 
-	<a href="#" class="nav-link animated-icon">
+	<a href="{{ route('admin.settings.index') }}" class="nav-link animated-icon">
 
 		<i class="fas fa-cog"></i>
 
@@ -120,7 +120,7 @@ $profile = auth()->user()->media->where('collection_name','profile')->first();
 	</a>
 
 
-	<a href="#" class="dropdown-item">
+	<a href="{{ route('admin.settings.index') }}" class="dropdown-item">
 
 		<i class="fas fa-cog text-warning"></i>
 
