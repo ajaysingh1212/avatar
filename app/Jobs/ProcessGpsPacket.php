@@ -11,6 +11,7 @@ use App\Events\LocationUpdated;
 
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\Log;
 
 class ProcessGpsPacket implements ShouldQueue
 {
@@ -25,62 +26,80 @@ class ProcessGpsPacket implements ShouldQueue
 
     public function handle()
     {
-        $imei = $this->data['imei'];
+        try {
 
-        /* =========================
-           SAVE LOCATION HISTORY
-        ========================= */
+            $imei = $this->data['imei'];
 
-        DeviceLocation::create([
-            'imei'       => $imei,
-            'tracked_at' => $this->data['tracked_at'],
-            'latitude'   => $this->data['latitude'],
-            'longitude'  => $this->data['longitude'],
-            'speed'      => $this->data['speed'],
-            'course'     => $this->data['course'],
-            'ignition'   => $this->data['ignition'],
-            'gps_valid'  => $this->data['gps_valid'],
-        ]);
+            // server receive time (best for online/offline logic)
+            $trackedAt = now();
 
-        /* =========================
-           UPDATE LIVE LOCATION
-        ========================= */
+            /* =========================
+               SAVE LOCATION HISTORY
+            ========================= */
 
-        LiveLocation::updateOrCreate(
-            ['imei' => $imei],
-            [
+            DeviceLocation::create([
+                'imei'       => $imei,
+                'tracked_at' => $trackedAt,
                 'latitude'   => $this->data['latitude'],
                 'longitude'  => $this->data['longitude'],
                 'speed'      => $this->data['speed'],
                 'course'     => $this->data['course'],
                 'ignition'   => $this->data['ignition'],
                 'gps_valid'  => $this->data['gps_valid'],
-                'tracked_at' => $this->data['tracked_at'],
-            ]
-        );
+            ]);
 
-        /* =========================
-           TRIP DETECTION
-        ========================= */
+            /* =========================
+               UPDATE LIVE LOCATION
+            ========================= */
 
-        TripService::detect($this->data);
+            LiveLocation::updateOrCreate(
+                ['imei' => $imei],
+                [
+                    'latitude'   => $this->data['latitude'],
+                    'longitude'  => $this->data['longitude'],
+                    'speed'      => $this->data['speed'],
+                    'course'     => $this->data['course'],
+                    'ignition'   => $this->data['ignition'],
+                    'gps_valid'  => $this->data['gps_valid'],
+                    'tracked_at' => $trackedAt,
+                ]
+            );
 
-        /* =========================
-           ENGINE ALERTS
-        ========================= */
+            /* =========================
+               TRIP DETECTION
+            ========================= */
 
-        AlertService::engine($this->data);
+            // TripService::detect($this->data);
 
-        /* =========================
-           GEOFENCE CHECK
-        ========================= */
+            /* =========================
+               ENGINE ALERTS
+            ========================= */
 
-        GeofenceService::check($this->data);
+            // AlertService::engine($this->data);
 
-        /* =========================
-           WEBSOCKET BROADCAST
-        ========================= */
+            /* =========================
+               GEOFENCE CHECK
+            ========================= */
 
-        event(new LocationUpdated($this->data));
+            // GeofenceService::check($this->data);
+
+            /* =========================
+               WEBSOCKET BROADCAST
+            ========================= */
+
+            event(new LocationUpdated([
+                'imei'      => $imei,
+                'latitude'  => $this->data['latitude'],
+                'longitude' => $this->data['longitude'],
+                'speed'     => $this->data['speed'],
+                'ignition'  => $this->data['ignition'],
+                'tracked_at'=> $trackedAt
+            ]));
+
+        } catch (\Exception $e) {
+
+            Log::error("GPS JOB ERROR: ".$e->getMessage());
+
+        }
     }
 }

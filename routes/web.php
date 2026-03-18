@@ -15,6 +15,8 @@ use App\Http\Controllers\Admin\StockController;
 use App\Http\Controllers\Admin\StockReportController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\VehicleController;
+use App\Http\Controllers\Admin\WalletController;
+use App\Http\Controllers\Admin\WalletTransactionController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -93,28 +95,99 @@ Route::middleware(['auth'])
 
     Route::resource('licenses', LicenseController::class)
         ->names('licenses');
-    Route::get('license-stock',[LicenseStockController::class,'index'])
-    ->name('license-stock.index');
-
-    Route::get('license-transfer/create',[LicenseTransferController::class,'create'])
-    ->name('license-transfer.create');
-
-    Route::post('license-transfer/store',[LicenseTransferController::class,'store'])
-    ->name('license-transfer.store');
-    
-    // stocks
-
-    Route::get('stocks',[StockController::class,'index'])
+    Route::get('stocks',[LicenseStockController::class,'index'])
     ->name('stocks.index');
-
-    Route::get('stock-transfer/create',[LicenseTransferController::class,'create'])
-    ->name('stock-transfer.create');
-
-    Route::post('stock-transfer/store',[LicenseTransferController::class,'store'])
-    ->name('stock-transfer.store');
-
+        Route::get('stocks/{id}', [LicenseStockController::class,'show'])
+        ->name('stocks.show');
+    Route::get('/get-users-by-role/{role}',[LicenseTransferController::class,'getUsersByRole'])->name('getUsersByRole');
+    Route::resource('license-transfer', LicenseTransferController::class);
     Route::get('stock-report',[StockReportController::class,'index'])
     ->name('stock-report.index');
+
+    Route::get('stock-report-users/{role}',[StockReportController::class,'getUsersByRole']);
+
+    Route::post('stock-report',[StockReportController::class,'report'])
+    ->name('stock-report.search');
+
+    // wallet trensction
+
+  /* =================================
+       WALLET MANAGEMENT
+    ================================= */
+
+    Route::get('/wallets', [WalletController::class,'index'])->name('wallets.index');
+
+    Route::get('/wallets/create', [WalletController::class,'create'])->name('wallets.create');
+
+    Route::post('/wallets', [WalletController::class,'store'])->name('wallets.store');
+
+    Route::get('/wallets/{id}', [WalletController::class,'show'])->name('wallets.show');
+
+    Route::get('/wallets/{id}/edit', [WalletController::class,'edit'])->name('wallets.edit');
+
+    Route::put('/wallets/{id}', [WalletController::class,'update'])->name('wallets.update');
+    Route::get('/wallets/{wallet_id}/history',[WalletController::class,'history'])->name('wallet.history');
+    Route::get('/wallet/{id}/analytics',[WalletController::class,'analytics'])->name('wallet.analytics');
+
+    Route::get('/wallet/{id}/live-transactions',[WalletController::class,'liveTransactions'])->name('wallet.liveTransactions');
+
+    /* =================================
+       WALLET APPROVAL
+    ================================= */
+
+    Route::post('/wallets/{id}/approve', [WalletController::class,'approveWallet'])->name('wallets.approve');
+
+    Route::post('/wallets/{id}/reject', [WalletController::class,'rejectWallet'])->name('wallets.reject');
+
+
+
+    /* =================================
+       WALLET FREEZE
+    ================================= */
+
+    Route::post('/wallets/{id}/freeze', [WalletController::class,'freeze'])->name('wallets.freeze');
+
+    Route::post('/wallets/{id}/unfreeze', [WalletController::class,'unfreeze'])->name('wallets.unfreeze');
+
+
+
+    /* =================================
+       WALLET HISTORY
+    ================================= */
+
+    Route::get('/wallets/{wallet_id}/history', [WalletController::class,'history'])->name('wallets.history');
+
+
+
+    /* =================================
+       WALLET TRANSACTIONS
+    ================================= */
+
+    Route::get('/transactions', [WalletTransactionController::class,'index'])->name('transactions.index');
+
+    Route::get('/transactions/pending', [WalletTransactionController::class,'pending'])->name('transactions.pending');
+
+    Route::get('/transactions/{id}', [WalletTransactionController::class,'show'])->name('transactions.show');
+
+
+
+    /* =================================
+       ADD AMOUNT REQUEST
+    ================================= */
+
+    Route::post('/transactions/add-amount', [WalletTransactionController::class,'addAmount'])->name('transactions.addAmount');
+
+
+
+    /* =================================
+       TRANSACTION APPROVAL
+    ================================= */
+
+    Route::post('/transactions/{id}/approve', [WalletTransactionController::class,'approveTransaction'])->name('transactions.approve');
+
+    Route::post('/transactions/{id}/reject', [WalletTransactionController::class,'rejectTransaction'])->name('transactions.reject');
+
+
 
 });
 

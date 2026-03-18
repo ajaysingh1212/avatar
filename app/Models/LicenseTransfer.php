@@ -9,26 +9,20 @@ class LicenseTransfer extends Model
 
     protected $fillable = [
 
-        'license_id',
         'from_user_id',
         'to_user_id',
-        'transferred_at'
+        'total_licenses',
+        'created_by',
+        'notes'
 
     ];
 
-    public function license()
+    public function items()
     {
-        return $this->belongsTo(License::class);
+        return $this->hasMany(LicenseTransferItem::class,'transfer_id');
     }
-
-    public function fromUser()
-    {
-        return $this->belongsTo(User::class,'from_user_id');
-    }
-
-    public function toUser()
+    public function user()
     {
         return $this->belongsTo(User::class,'to_user_id');
     }
-
 }

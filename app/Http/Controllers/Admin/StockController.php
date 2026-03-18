@@ -32,7 +32,7 @@ class StockController extends Controller
             ->where('is_used',1)
             ->count();
 
-        return view('admin.stocks.index',compact(
+        return view('admin.license_stock.index',compact(
             'stocks',
             'totalStock',
             'availableStock',

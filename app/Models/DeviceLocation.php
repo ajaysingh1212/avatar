@@ -1,10 +1,10 @@
 <?php
 
 namespace App\Models;
-
+use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Model;
 
-class DeviceLocation extends Model
+class DeviceLocation extends BaseModel
 {
     protected $fillable = [
 

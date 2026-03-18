@@ -26,6 +26,11 @@ padding:10px;
 border-bottom:1px solid #eee;
 }
 
+.search-box{
+padding:10px;
+border-bottom:1px solid #eee;
+}
+
 </style>
 
 
@@ -39,13 +44,18 @@ border-bottom:1px solid #eee;
 Devices
 </div>
 
+<div class="search-box">
+<input type="text" id="searchDevice" class="form-control" placeholder="Search IMEI...">
+</div>
+
 <div class="device-scroll">
 
-<ul class="list-group list-group-flush">
+<ul class="list-group list-group-flush" id="deviceList">
 
 @foreach($devices as $d)
 
 <li class="list-group-item device-item"
+data-imei="{{ $d->imei }}"
 id="device-{{ $d->imei }}"
 onclick="focusDevice('{{ $d->imei }}')">
 
@@ -144,20 +154,22 @@ Show History
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<!-- Pusher (required for Reverb) -->
 <script src="https://js.pusher.com/8.2/pusher.min.js"></script>
 
-<!-- Laravel Echo -->
 <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.15.0/dist/echo.iife.js"></script>
 
-<script src="https://maps.googleapis.com/maps/api/js?key={{ $settings->map_api_key }}"></script>
+<script async defer
+src="https://maps.googleapis.com/maps/api/js?key={{ $settings->map_api_key }}&callback=initMap">
+</script>
 
 
 <script>
+
 let map;
 let markers = {};
 let lastSeen = {};
 let historyPath;
+
 
 /*
 =====================
@@ -167,38 +179,45 @@ INIT GOOGLE MAP
 
 function initMap(){
 
-    map = new google.maps.Map(document.getElementById('map'),{
-        zoom:12,
-        center:{
-            lat: {{ $devices->first()->latitude ?? 25.6097 }},
-            lng: {{ $devices->first()->longitude ?? 85.1480 }}
-        }
-    });
+map = new google.maps.Map(document.getElementById('map'),{
+
+zoom:12,
+
+center:{
+lat: {{ $devices->first()->latitude ?? 25.6097 }},
+lng: {{ $devices->first()->longitude ?? 85.1480 }}
+}
+
+});
 
 }
 
-initMap();
 
 
 /*
 =====================
-INIT ECHO
+INIT WEBSOCKET
 =====================
 */
 
 window.Pusher = Pusher;
 
 window.Echo = new Echo({
-    broadcaster: 'reverb',
-    key: "{{ env('REVERB_APP_KEY') }}",
-    wsHost: "127.0.0.1",
-    wsPort: 8080,
-    wssPort: 8080,
-    forceTLS: false,
-    enabledTransports: ['ws']
+
+broadcaster: 'reverb',
+
+key: "{{ env('REVERB_APP_KEY') }}",
+
+wsHost: window.location.hostname,
+
+wsPort: 8080,
+
+forceTLS:false,
+
+enabledTransports:['ws','wss']
+
 });
 
-console.log("Echo Connected", window.Echo);
 
 
 /*
@@ -208,93 +227,160 @@ WEBSOCKET LISTENER
 */
 
 window.Echo.channel('gps')
+
 .listen('.LocationUpdated', function(e){
 
-    console.log("📡 GPS EVENT RECEIVED:", e);
+console.log("LIVE EVENT", e);
 
-    let d = e.data;
+/* FIX EVENT DATA */
 
-    let pos = {
-        lat: parseFloat(d.latitude),
-        lng: parseFloat(d.longitude)
-    };
+let d = e.data ? e.data : e;
 
-
-    /*
-    =====================
-    MAP MARKER
-    =====================
-    */
-
-    if(markers[d.imei]){
-
-        markers[d.imei].setPosition(pos);
-
-    }else{
-
-        markers[d.imei] = new google.maps.Marker({
-            position: pos,
-            map: map,
-            title: d.imei
-        });
-
-    }
+if(!d.imei) return;
 
 
-    /*
-    =====================
-    SPEED
-    =====================
-    */
+let pos = {
 
-    let speed = document.getElementById("speed-"+d.imei);
+lat: parseFloat(d.latitude),
 
-    if(speed){
-        speed.innerHTML = d.speed+" km/h";
-    }
+lng: parseFloat(d.longitude)
+
+};
 
 
-    /*
-    =====================
-    IGNITION
-    =====================
-    */
 
-    let ignition = document.getElementById("ignition-"+d.imei);
+/*
+=====================
+MAP MARKER UPDATE
+=====================
+*/
 
-    if(ignition){
+if(markers[d.imei]){
 
-        ignition.innerHTML = d.ignition ? "ON":"OFF";
-        ignition.className = "badge "+(d.ignition ? "badge-success":"badge-danger");
+markers[d.imei].setPosition(pos);
 
-    }
+}else{
 
+markers[d.imei] = new google.maps.Marker({
 
-    /*
-    =====================
-    STATUS
-    =====================
-    */
+position:pos,
 
-    let status = document.getElementById("status-"+d.imei);
+map:map,
 
-    if(status){
-
-        status.innerHTML="ONLINE";
-        status.className="badge badge-success";
-
-    }
-
-
-    /*
-    =====================
-    LAST SEEN
-    =====================
-    */
-
-    lastSeen[d.imei] = Date.now();
+title:d.imei
 
 });
+
+}
+
+
+
+/*
+=====================
+UPDATE UI
+=====================
+*/
+
+updateDeviceUI(d);
+
+moveOnlineTop(d.imei);
+
+lastSeen[d.imei] = Date.now();
+
+map.panTo(pos);
+
+});
+
+
+
+/*
+=====================
+UPDATE DEVICE UI
+=====================
+*/
+
+function updateDeviceUI(d){
+
+let speed = document.getElementById("speed-"+d.imei);
+
+let ignition = document.getElementById("ignition-"+d.imei);
+
+let status = document.getElementById("status-"+d.imei);
+
+if(speed){
+
+speed.innerHTML = (d.speed ?? 0) + " km/h";
+
+}
+
+if(ignition){
+
+let ign = Number(d.ignition) === 1;
+
+ignition.innerHTML = ign ? "ON" : "OFF";
+
+ignition.className = "badge " + (ign ? "badge-success":"badge-danger");
+
+}
+
+if(status){
+
+status.innerHTML="ONLINE";
+
+status.className="badge badge-success";
+
+}
+
+}
+
+
+
+/*
+=====================
+MOVE ONLINE DEVICE TOP
+=====================
+*/
+
+function moveOnlineTop(imei){
+
+let list = document.getElementById("deviceList");
+
+let item = document.getElementById("device-"+imei);
+
+if(item){
+
+list.prepend(item);
+
+}
+
+}
+
+
+
+/*
+=====================
+SEARCH DEVICE
+=====================
+*/
+
+document.getElementById("searchDevice")
+
+.addEventListener("keyup",function(){
+
+let val = this.value.toLowerCase();
+
+document.querySelectorAll("#deviceList li")
+
+.forEach(function(li){
+
+let imei = li.dataset.imei.toLowerCase();
+
+li.style.display = imei.includes(val) ? "list-item":"none";
+
+});
+
+});
+
 
 
 /*
@@ -305,12 +391,16 @@ FOCUS DEVICE
 
 function focusDevice(imei){
 
-    if(markers[imei]){
-        map.setCenter(markers[imei].getPosition());
-        map.setZoom(16);
-    }
+if(markers[imei]){
+
+map.setCenter(markers[imei].getPosition());
+
+map.setZoom(16);
 
 }
+
+}
+
 
 
 /*
@@ -321,33 +411,44 @@ AUTO OFFLINE CHECK
 
 setInterval(function(){
 
-    Object.keys(lastSeen).forEach(function(imei){
+Object.keys(lastSeen).forEach(function(imei){
 
-        if(Date.now() - lastSeen[imei] > 30000){
+if(Date.now() - lastSeen[imei] > 30000){
 
-            let status = document.getElementById("status-"+imei);
-            let speed = document.getElementById("speed-"+imei);
-            let ignition = document.getElementById("ignition-"+imei);
+let status = document.getElementById("status-"+imei);
 
-            if(status){
-                status.innerHTML="OFFLINE";
-                status.className="badge badge-secondary";
-            }
+let speed = document.getElementById("speed-"+imei);
 
-            if(speed){
-                speed.innerHTML="0 km/h";
-            }
+let ignition = document.getElementById("ignition-"+imei);
 
-            if(ignition){
-                ignition.innerHTML="OFF";
-                ignition.className="badge badge-danger";
-            }
+if(status){
 
-        }
+status.innerHTML="OFFLINE";
 
-    });
+status.className="badge badge-secondary";
+
+}
+
+if(speed){
+
+speed.innerHTML="0 km/h";
+
+}
+
+if(ignition){
+
+ignition.innerHTML="OFF";
+
+ignition.className="badge badge-danger";
+
+}
+
+}
+
+});
 
 },5000);
+
 
 
 /*
@@ -358,47 +459,62 @@ LOAD HISTORY
 
 function loadHistory(){
 
-    let imei = document.getElementById('historyDevice').value;
+let imei = document.getElementById('historyDevice').value;
 
-    let from = document.getElementById('from').value;
+let from = document.getElementById('from').value;
 
-    let to = document.getElementById('to').value;
+let to = document.getElementById('to').value;
 
-    fetch(`/admin/vehicles/history?imei=${imei}&from=${from}&to=${to}`)
+fetch(`/admin/vehicles/history?imei=${imei}&from=${from}&to=${to}`)
 
-    .then(res=>res.json())
+.then(res=>res.json())
 
-    .then(data=>{
+.then(data=>{
 
-        let path=[];
+let path=[];
 
-        data.forEach(p=>{
+data.forEach(p=>{
 
-            path.push({
-                lat:parseFloat(p.latitude),
-                lng:parseFloat(p.longitude)
-            });
+path.push({
 
-        });
+lat:parseFloat(p.latitude),
 
-        if(historyPath){
-            historyPath.setMap(null);
-        }
+lng:parseFloat(p.longitude)
 
-        historyPath = new google.maps.Polyline({
-            path:path,
-            map:map,
-            strokeColor:"#ff0000",
-            strokeWeight:3
-        });
+});
 
-        if(path.length){
-            map.setCenter(path[0]);
-        }
+});
 
-    });
+
+if(historyPath){
+
+historyPath.setMap(null);
 
 }
+
+historyPath = new google.maps.Polyline({
+
+path:path,
+
+map:map,
+
+strokeColor:"#ff0000",
+
+strokeWeight:4
+
+});
+
+
+if(path.length){
+
+map.setCenter(path[0]);
+
+}
+
+});
+
+}
+
 </script>
 
 @endsection

@@ -78,4 +78,8 @@ class User extends Authenticatable
     {
     return $this->media()->where('collection_name','profile')->first();
     }
+    public function hasRole($role)
+{
+    return $this->roles()->where('slug', $role)->exists();
+}
 }

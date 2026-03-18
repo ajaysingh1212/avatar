@@ -1,10 +1,10 @@
 <?php
 
 namespace App\Models;
-
+use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Model;
 
-class RolePermission extends Model
+class RolePermission extends BaseModel
 {
     //
 }

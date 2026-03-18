@@ -2,10 +2,11 @@
 
 namespace App\Models;
 
+use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class License extends Model
+class License extends BaseModel
 {
     use HasFactory;
 
@@ -22,19 +23,36 @@ class License extends Model
         'status',
         'is_used',
         'purchase_reference',
-        'notes'
+        'notes',
+        'transferred_by',
+        'transferred_at'
 
     ];
 
-    /*
-    |--------------------------------------------------------------------------
-    | Relations
-    |--------------------------------------------------------------------------
-    */
+    protected $casts = [
+
+        'issued_at' => 'datetime',
+        'expires_at' => 'datetime'
+
+    ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Helper Methods
+    |--------------------------------------------------------------------------
+    */
+
+    public function isAvailable()
+    {
+        return $this->status == 'active'
+            && $this->is_used == 0
+            && $this->user_id == null;
     }
 
 }

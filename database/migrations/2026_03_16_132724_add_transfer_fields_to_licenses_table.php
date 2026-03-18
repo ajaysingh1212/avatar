@@ -11,19 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('license_transfers', function (Blueprint $table) {
+        Schema::table('licenses', function (Blueprint $table) {
 
-            $table->id();
-
-            $table->unsignedBigInteger('license_id');
-
-            $table->unsignedBigInteger('from_user_id')->nullable();
-
-            $table->unsignedBigInteger('to_user_id');
-
+            $table->unsignedBigInteger('transfer_id')->nullable()->after('user_id');
+            $table->unsignedBigInteger('transferred_by')->nullable();
             $table->timestamp('transferred_at')->nullable();
-
-            $table->timestamps();
 
         });
     }
@@ -33,6 +25,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('license_transfers');
+        Schema::table('licenses', function (Blueprint $table) {
+            //
+        });
     }
 };

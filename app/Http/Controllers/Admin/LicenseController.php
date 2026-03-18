@@ -64,7 +64,7 @@ class LicenseController extends Controller
                 'is_used' => false,
 
                 // IMPORTANT → license creator owns stock
-                'user_id' => $adminId,
+                'user_id' => null,
 
                 'notes' => $request->notes
 
