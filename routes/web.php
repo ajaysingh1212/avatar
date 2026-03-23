@@ -148,7 +148,7 @@ Route::middleware(['auth'])
     Route::post('/wallets/{id}/freeze', [WalletController::class,'freeze'])->name('wallets.freeze');
 
     Route::post('/wallets/{id}/unfreeze', [WalletController::class,'unfreeze'])->name('wallets.unfreeze');
-
+    Route::post('/wallets/add-fund',[WalletTransactionController::class,'addAmount']);
 
 
     /* =================================
@@ -169,8 +169,10 @@ Route::middleware(['auth'])
 
     Route::get('/transactions/{id}', [WalletTransactionController::class,'show'])->name('transactions.show');
 
-
-
+    Route::post('/transactions/approve/{id}', [WalletTransactionController::class,'approveTransaction']);
+    Route::post('/transactions/reject/{id}', [WalletTransactionController::class,'rejectTransaction']);
+    Route::post('/transactions/hold/{id}', [WalletTransactionController::class,'holdTransaction']);
+    Route::get('/transactions/show/{id}', [WalletTransactionController::class,'show'])->name('transactions.show');
     /* =================================
        ADD AMOUNT REQUEST
     ================================= */

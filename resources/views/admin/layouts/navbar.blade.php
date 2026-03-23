@@ -1,3 +1,182 @@
+{{-- MODAL --}}
+<div class="modal fade" id="walletModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-wallet"></i> Create Wallet
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal">
+                    &times;
+                </button>
+            </div>
+
+            <div class="modal-body">
+
+                <form id="walletForm" >
+
+                    @csrf
+
+                    <input type="hidden" name="user_id" value="{{ auth()->id() }}">
+
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text"
+                               class="form-control"
+                               value="{{ auth()->user()->name }}"
+                               readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email"
+                               class="form-control"
+                               value="{{ auth()->user()->email }}"
+                               readonly>
+                    </div>
+
+                    <button type="submit" class="btn btn-success btn-block">
+                        <i class="fas fa-check"></i> Create Wallet
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+{{-- JS --}}
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+
+    const openBtn = document.querySelector('.openWalletModal');
+    const form = document.getElementById('walletForm');
+
+    // OPEN MODAL
+    if(openBtn){
+        openBtn.addEventListener('click', function(e){
+            e.preventDefault();
+            $('#walletModal').modal('show');
+        });
+    }
+
+    // AJAX SUBMIT
+    if(form){
+        form.addEventListener('submit', function(e){
+            e.preventDefault(); // 🔥 MOST IMPORTANT
+
+            let formData = new FormData(form);
+
+            fetch("{{ route('admin.wallets.store') }}", {
+                method: "POST",
+                headers: {
+                    'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                },
+                body: formData
+            })
+            .then(async res => {
+
+                let data = await res.json();
+
+                if(!res.ok){
+                    throw data;
+                }
+
+                return data;
+            })
+            .then(data => {
+
+                Swal.fire({
+                    icon:'success',
+                    title:data.message
+                }).then(()=>{
+                    location.reload();
+                });
+
+            })
+            .catch(err => {
+
+                Swal.fire({
+                    icon:'error',
+                    title: err.message || 'Wallet already exists'
+                });
+
+            });
+
+        });
+    }
+
+});
+</script>
+@endsection
+
+
+{{-- CSS --}}
+<style>
+
+/* MODAL FIX */
+.modal {
+    z-index: 9999 !important;
+}
+
+.modal-backdrop {
+    z-index: 9990 !important;
+}
+
+/* MODAL DESIGN */
+.modal-content {
+    background: #1f2937;
+    color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+}
+
+.modal-header {
+    border-bottom: none;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+}
+
+.modal-body {
+    background: #1f2937;
+}
+
+/* INPUT FIX */
+.modal-content input {
+    background: #374151 !important;
+    color: #fff !important;
+    border: 1px solid #4b5563;
+    border-radius: 8px;
+}
+
+.modal-content input::placeholder {
+    color: #9ca3af;
+}
+
+.modal-content input:focus {
+    background: #374151 !important;
+    border-color: #3b82f6;
+    box-shadow: 0 0 5px rgba(59,130,246,0.5);
+}
+
+/* BUTTON */
+.modal-content .btn-success {
+    background: linear-gradient(135deg, #10b981, #059669);
+    border: none;
+    font-weight: 600;
+    border-radius: 8px;
+}
+
+.modal-content .btn-success:hover {
+    transform: scale(1.03);
+}
+
+</style>
+
 <nav class="main-header navbar navbar-expand navbar-dark">
 
 <!-- LEFT SIDE -->
@@ -34,14 +213,33 @@
 
 <!-- Wallet -->
 
-<li class="nav-item mr-3">
+@if($authWallet)
+
 <a href="#" class="nav-link wallet-box">
-<i class="fas fa-wallet wallet-icon"></i>
-<span class="wallet-amount">
-₹ 2,500
-</span>
+
+    <i class="fas fa-wallet wallet-icon"></i>
+
+    <span class="wallet-amount">
+        ₹ {{ number_format($authWallet->balance,2) }}
+    </span>
+
+    @if($authWallet->is_frozen)
+        <span class="badge badge-danger ml-2">Frozen</span>
+    @elseif($authWallet->status=='pending')
+        <span class="badge badge-warning ml-2">Pending</span>
+    @endif
+
 </a>
-</li>
+
+@else
+
+{{-- APPLY WALLET BUTTON --}}
+<a href="#" class="nav-link wallet-box text-warning openWalletModal">
+    <i class="fas fa-plus-circle"></i>
+    <span class="wallet-amount">Apply Wallet</span>
+</a>
+@endif
+
 
 <!-- Theme + RTL Switcher -->
 

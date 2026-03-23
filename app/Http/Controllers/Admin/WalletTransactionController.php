@@ -11,6 +11,32 @@ use DB;
 
 class WalletTransactionController extends Controller
 {
+    public function index(Request $request)
+    {
+        $query = WalletTransaction::with('wallet.user')->latest();
+
+        // Wallet filter
+        if ($request->wallet) {
+            $query->where('wallet_id', $request->wallet);
+        }
+
+        // Status filter
+        if ($request->status) {
+            $query->where('status', $request->status);
+        }
+
+        // Date filter
+        if ($request->from_date && $request->to_date) {
+            $query->whereBetween('created_at', [
+                $request->from_date . ' 00:00:00',
+                $request->to_date . ' 23:59:59'
+            ]);
+        }
+
+        $transactions = $query->get();
+
+        return view('admin.transactions.index', compact('transactions'));
+    }
 
     public function pending()
     {
@@ -25,7 +51,6 @@ class WalletTransactionController extends Controller
 
     public function addAmount(Request $request)
     {
-
         $request->validate([
             'wallet_id'=>'required|exists:wallets,id',
             'amount'=>'required|numeric|min:1'
@@ -33,100 +58,178 @@ class WalletTransactionController extends Controller
 
         $wallet = Wallet::findOrFail($request->wallet_id);
 
-        $txn = WalletTransaction::create([
+        // ❌ CHECK 1: Wallet status
+        if($wallet->status != 'approved'){
+            return response()->json([
+                'message'=>'Wallet is not approved'
+            ],422);
+        }
 
-            'wallet_id'=>$wallet->id,
+        // ❌ CHECK 2: Frozen wallet
+        if($wallet->is_frozen){
+            return response()->json([
+                'message'=>'Wallet is frozen, cannot add funds'
+            ],422);
+        }
 
-            'transaction_id'=>'TXN'.time().rand(1000,9999),
+        // ❌ CHECK 3: Fraud flag
+        if($wallet->fraud_flag){
+            return response()->json([
+                'message'=>'Wallet is flagged for suspicious activity'
+            ],422);
+        }
 
-            'type'=>'credit',
-
-            'amount'=>$request->amount,
-
-            'before_balance'=>$wallet->balance,
-
-            'after_balance'=>$wallet->balance + $request->amount,
-
-            'status'=>'pending',
-
-            'created_by_id'=>auth()->id(),
-
-            'created_ip'=>$request->ip()
-
-        ]);
-
-        WalletHistory::create([
-
-            'wallet_id'=>$wallet->id,
-
-            'action'=>'amount_requested',
-
-            'description'=>'User requested wallet topup',
-
-            'performed_by'=>auth()->id(),
-
-            'module'=>'transaction',
-
-            'ip'=>$request->ip()
-
-        ]);
-
-        return response()->json([
-            'message'=>'Amount request submitted',
-            'data'=>$txn
-        ]);
-
-    }
-
-    public function approveTransaction($id)
-    {
+        // ❌ CHECK 4: Single transaction limit
+        if($wallet->single_txn_limit && $request->amount > $wallet->single_txn_limit){
+            return response()->json([
+                'message'=>'Amount exceeds single transaction limit'
+            ],422);
+        }
 
         DB::beginTransaction();
 
-        try {
+        try{
 
-            $txn = WalletTransaction::findOrFail($id);
+            $txn = WalletTransaction::create([
 
-            $wallet = Wallet::findOrFail($txn->wallet_id);
+                'wallet_id'=>$wallet->id,
+                'transaction_id'=>'TXN'.time().rand(1000,9999),
 
-            $wallet->balance = $wallet->balance + $txn->amount;
+                'type'=>'credit',
+                'amount'=>$request->amount,
 
-            $wallet->save();
+                'before_balance'=>$wallet->balance,
+                'after_balance'=>$wallet->balance + $request->amount,
 
-            $txn->update([
+                'status'=>'pending',
 
-                'status'=>'approved',
-
-                'approved_by'=>auth()->id(),
-
-                'approved_at'=>now(),
-
-                'updated_by_id'=>auth()->id(),
-
-                'updated_ip'=>request()->ip()
+                'created_by_id'=>auth()->id(),
+                'created_ip'=>$request->ip()
 
             ]);
 
             WalletHistory::create([
 
                 'wallet_id'=>$wallet->id,
-
-                'action'=>'transaction_approved',
-
-                'description'=>'Transaction approved',
+                'action'=>'amount_requested',
+                'description'=>'Admin added fund request',
 
                 'performed_by'=>auth()->id(),
-
                 'module'=>'transaction',
-
-                'ip'=>request()->ip()
+                'ip'=>$request->ip()
 
             ]);
 
             DB::commit();
 
             return response()->json([
-                'message'=>'Transaction approved'
+                'message'=>'Fund request created successfully'
+            ]);
+
+        }catch(\Exception $e){
+
+            DB::rollBack();
+
+            return response()->json([
+                'message'=>'Failed to add fund'
+            ],500);
+        }
+    }
+    public function holdTransaction($id)
+{
+    $txn = WalletTransaction::findOrFail($id);
+
+    $txn->update([
+        'status' => 'hold',
+        'updated_by_id'=>auth()->id(),
+        'updated_ip'=>request()->ip()
+    ]);
+
+    WalletHistory::create([
+        'wallet_id'=>$txn->wallet_id,
+        'action'=>'transaction_hold',
+        'description'=>'Transaction put on hold',
+        'performed_by'=>auth()->id(),
+        'module'=>'transaction',
+        'ip'=>request()->ip()
+    ]);
+
+    return response()->json([
+        'message'=>'Transaction on hold'
+    ]);
+}
+
+
+
+   public function approveTransaction($id)
+    {
+        DB::beginTransaction();
+
+        try {
+
+            $txn = WalletTransaction::findOrFail($id);
+            $wallet = Wallet::findOrFail($txn->wallet_id);
+
+            // ❌ Already processed check
+            if($txn->status != 'pending'){
+                return response()->json([
+                    'message' => 'Transaction already processed'
+                ], 422);
+            }
+
+            // ❌ Wallet status check
+            if($wallet->status != 'approved'){
+                return response()->json([
+                    'message' => 'Wallet is not active (not approved)'
+                ], 422);
+            }
+
+            // ❌ Frozen check
+            if($wallet->is_frozen){
+                return response()->json([
+                    'message' => 'Wallet is frozen, cannot approve transaction'
+                ], 422);
+            }
+
+            // ❌ Fraud check
+            if($wallet->fraud_flag){
+                return response()->json([
+                    'message' => 'Wallet flagged for suspicious activity'
+                ], 422);
+            }
+
+            // ❌ HOLD check (important)
+            if($txn->status == 'hold'){
+                return response()->json([
+                    'message' => 'Transaction is on hold, cannot approve'
+                ], 422);
+            }
+
+            // ✅ APPROVE
+            $wallet->balance = $wallet->balance + $txn->amount;
+            $wallet->save();
+
+            $txn->update([
+                'status'=>'approved',
+                'approved_by'=>auth()->id(),
+                'approved_at'=>now(),
+                'updated_by_id'=>auth()->id(),
+                'updated_ip'=>request()->ip()
+            ]);
+
+            WalletHistory::create([
+                'wallet_id'=>$wallet->id,
+                'action'=>'transaction_approved',
+                'description'=>'Transaction approved',
+                'performed_by'=>auth()->id(),
+                'module'=>'transaction',
+                'ip'=>request()->ip()
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'message'=>'Transaction approved successfully'
             ]);
 
         } catch (\Exception $e) {
@@ -134,11 +237,10 @@ class WalletTransactionController extends Controller
             DB::rollBack();
 
             return response()->json([
-                'message'=>'Transaction failed'
+                'message'=>'Transaction failed',
+                'error' => $e->getMessage() // optional for debug
             ],500);
-
         }
-
     }
 
     public function rejectTransaction($id)
@@ -177,7 +279,12 @@ class WalletTransactionController extends Controller
         ]);
 
     }
+public function show($id)
+{
+    $txn = WalletTransaction::with('wallet.user')->findOrFail($id);
 
+    return view('admin.transactions.show', compact('txn'));
+}
     public function history($wallet_id)
     {
 

@@ -51,10 +51,18 @@ class WalletController extends Controller
 
     public function store(Request $request)
     {
-
         $request->validate([
             'user_id' => 'required|exists:users,id'
         ]);
+
+        // ❌ Already wallet check
+        $existingWallet = Wallet::where('user_id', $request->user_id)->first();
+
+        if($existingWallet){
+            return response()->json([
+                'message' => 'Wallet already exists for this user'
+            ], 422);
+        }
 
         DB::beginTransaction();
 
@@ -81,38 +89,43 @@ class WalletController extends Controller
                 'fraud_score' => 0,
 
                 'created_by_id' => auth()->id(),
-                'created_ip' => $request->ip()
+                'updated_by_id' => auth()->id(),
+
+                'created_ip' => $request->ip(),
+                'updated_ip' => $request->ip()
 
             ]);
 
-
+            // ✅ HISTORY LOG
             WalletHistory::create([
 
-                'wallet_id'=>$wallet->id,
-                'action'=>'wallet_created',
-                'description'=>'Wallet created',
-                'performed_by'=>auth()->id(),
-                'module'=>'wallet',
-                'ip'=>$request->ip()
+                'wallet_id' => $wallet->id,
+                'action' => 'wallet_created',
+                'description' => 'Wallet created by user',
+                'performed_by' => auth()->id(),
+                'module' => 'wallet',
+                'ip' => $request->ip()
 
             ]);
-
 
             DB::commit();
 
-            return redirect()
-                ->route('admin.wallets.index')
-                ->with('success','Wallet created successfully');
+            return response()->json([
+                'status' => true,
+                'message' => 'Wallet created successfully',
+                'data' => $wallet
+            ]);
 
-
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
 
             DB::rollBack();
 
-            return back()->with('error',$e->getMessage());
-
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to create wallet',
+                'error' => $e->getMessage() // optional debug
+            ], 500);
         }
-
     }
 
 

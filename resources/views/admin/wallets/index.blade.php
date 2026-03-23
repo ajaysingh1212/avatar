@@ -97,7 +97,13 @@ title="View Wallet">
 <i class="fas fa-eye"></i>
 
 </a>
+<button class="btn btn-primary btn-sm addFundBtn"
+    data-id="{{ $wallet->id }}"
+    data-wallet="{{ $wallet->wallet_number }}"
+    title="Add Fund">
 
+    <i class="fas fa-plus-circle"></i>
+</button>
 
 <a href="{{ route('admin.wallets.edit',$wallet->id) }}"
 class="btn btn-warning btn-sm action-btn"
@@ -224,7 +230,96 @@ title="Unfreeze Wallet">
 </div>
 
 </div>
+<div class="modal fade" id="addFundModal">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content custom-modal">
 
+            <div class="modal-header custom-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-wallet"></i> Add Fund
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+            </div>
+
+            <div class="modal-body">
+
+                <form id="addFundForm">
+
+                    @csrf
+
+                    <input type="hidden" name="wallet_id" id="wallet_id">
+
+                    <div class="form-group">
+                        <label>Wallet</label>
+                        <input type="text" id="wallet_no" class="form-control custom-input" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Amount</label>
+                        <input type="number" name="amount" class="form-control custom-input" placeholder="Enter amount">
+                    </div>
+
+                    <button class="btn btn-gradient btn-block mt-3">
+                        <i class="fas fa-plus-circle"></i> Add Fund
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+<style>
+    /* Modal Background */
+.custom-modal {
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0px 10px 30px rgba(0,0,0,0.3);
+    border: none;
+}
+
+/* Header Gradient */
+.custom-header {
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    color: white;
+    border-bottom: none;
+}
+
+/* Input Styling */
+.custom-input {
+    border-radius: 10px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    transition: 0.3s;
+}
+
+.custom-input:focus {
+    border-color: #4facfe;
+    box-shadow: 0px 0px 8px rgba(79,172,254,0.5);
+}
+
+/* Button Gradient */
+.btn-gradient {
+    background: linear-gradient(135deg, #00c853, #64dd17);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 10px;
+    transition: 0.3s;
+}
+
+.btn-gradient:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 5px 15px rgba(0,200,83,0.4);
+}
+
+/* Label styling */
+.modal-body label {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+</style>
 @endsection
 
 
@@ -352,6 +447,58 @@ form.submit();
 
 });
 
+
+// OPEN MODAL
+$('.addFundBtn').click(function(){
+
+    let id = $(this).data('id');
+    let wallet = $(this).data('wallet');
+
+    $('#wallet_id').val(id);
+    $('#wallet_no').val(wallet);
+
+    $('#addFundModal').modal('show');
+
+});
+
+
+// SUBMIT FUND
+$('#addFundForm').submit(function(e){
+
+    e.preventDefault();
+
+    $.ajax({
+        url: "{{ url('admin/wallets/add-fund') }}",
+        method: "POST",
+        data: $(this).serialize(),
+
+        success: function(res){
+
+            $('#addFundModal').modal('hide');
+
+            Swal.fire({
+                icon:'success',
+                title: res.message
+            }).then(()=>{
+                location.reload();
+            });
+
+        },
+
+        error: function(err){
+
+            let msg = err.responseJSON?.message || 'Something went wrong';
+
+            Swal.fire({
+                icon:'error',
+                title: msg
+            });
+
+        }
+
+    });
+
+});
 </script>
 
 

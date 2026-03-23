@@ -398,12 +398,12 @@ class="nav-link {{ request()->routeIs('admin.wallets.*') ? 'active' : '' }}">
 
 <li class="nav-item">
 
-<a href="{{ route('admin.transactions.pending') }}"
+<a href="{{ route('admin.transactions.index') }}"
 class="nav-link">
 
 <i class="far fa-circle nav-icon"></i>
 
-<p>Pending Transactions</p>
+<p>Transactions</p>
 
 </a>
 
@@ -412,22 +412,7 @@ class="nav-link">
 @endcan
 
 
-@can('wallet-history-view')
 
-<li class="nav-item">
-
-<a href="{{ route('admin.wallets.history',1) }}"
-class="nav-link">
-
-<i class="far fa-circle nav-icon"></i>
-
-<p>Wallet History</p>
-
-</a>
-
-</li>
-
-@endcan
 
 </ul>
 
